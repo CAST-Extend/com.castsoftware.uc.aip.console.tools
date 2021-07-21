@@ -1,5 +1,14 @@
 ## Release Notes :
 
+#### 1.25.1:
+
+Fix Jenkins Plugin:
+* Fixed an issue where node name was not used when creating new application
+
+#### 1.25.0:
+
+TODO
+
 #### 1.20.0
 
 This version contains compatibility fixes for AIP Console 1.20.0

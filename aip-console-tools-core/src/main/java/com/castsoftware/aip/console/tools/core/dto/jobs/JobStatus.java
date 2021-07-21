@@ -6,11 +6,16 @@ import com.castsoftware.aip.console.tools.core.dto.serializers.StatusStringMapSe
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
+@Getter
+@Setter
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class JobStatus {
 
     private JobState state;
@@ -27,12 +32,12 @@ public class JobStatus {
 
     private String appName;
 
-    @JsonDeserialize(using = FullStepsDeserializer.class)
-    private List<String> fullSteps;
+    //@JsonDeserialize(using = FullStepsDeserializer.class)List<JobStepDto>
+    private List<JobStepDto> fullSteps;
 
     private Map<String, String> logUrls;
 
-    private Map<String, String> logfiles;
+    private Map<String, String> logNames;
 
     private Date created;
 
@@ -42,7 +47,7 @@ public class JobStatus {
     }
 
     public JobStatus(String guid, String url, JobType type, JobState state, Map<String, String> parameters,
-                     Date created, Date updated, List<String> fullSteps, Map<String, String> logUrls, Map<String, String> logfiles) {
+                     Date created, Date updated, List<JobStepDto> fullSteps, Map<String, String> logUrls, Map<String, String> logNames) {
         this.guid = guid;
         this.url = url;
         this.jobType = type.getSerializableValue();
@@ -52,7 +57,7 @@ public class JobStatus {
         this.updated = updated;
         this.fullSteps = fullSteps;
         this.logUrls = logUrls;
-        this.logfiles = logfiles;
+        this.logNames = logNames;
     }
 
     public JobStatus(JobStatus status) {
@@ -67,79 +72,12 @@ public class JobStatus {
         updated = status.getUpdated();
         fullSteps = status.getFullSteps();
         logUrls = status.getLogUrls();
-        logfiles = status.getLogfiles();
-    }
-
-    public JobState getState() {
-        return state;
-    }
-
-    public void setState(JobState state) {
-        this.state = state;
+        logNames = status.getLogNames();
     }
 
     @JsonInclude(JsonInclude.Include.NON_NULL)
     @JsonSerialize(using = StatusStringMapSerializer.class)
     public Map<String, String> getLogUrls() {
         return logUrls;
-    }
-
-    @JsonInclude(JsonInclude.Include.NON_NULL)
-    public Map<String, String> getLogfiles() {
-        return logfiles;
-    }
-
-    @JsonInclude(JsonInclude.Include.NON_NULL)
-    public String getJobType() {
-        return jobType;
-    }
-
-    public final Map<String, String> getJobParameters() {
-        return jobParameters;
-    }
-
-    public String getGuid() {
-        return guid;
-    }
-
-    @JsonInclude(JsonInclude.Include.NON_EMPTY)
-    public List<String> getFullSteps() {
-        return fullSteps;
-    }
-
-    public String getAppGuid() {
-        return appGuid;
-    }
-
-    public void setAppGuid(String appGuid) {
-        this.appGuid = appGuid;
-    }
-
-    public Date getCreated() {
-        return created;
-    }
-
-    public void setCreated(Date created) {
-        this.created = created;
-    }
-
-    public Date getUpdated() {
-        return updated;
-    }
-
-    public void setUpdated(Date updated) {
-        this.updated = updated;
-    }
-
-    public String getUrl() {
-        return url;
-    }
-
-    public String getAppName() {
-        return appName;
-    }
-
-    public void setAppName(String appName) {
-        this.appName = appName;
     }
 }

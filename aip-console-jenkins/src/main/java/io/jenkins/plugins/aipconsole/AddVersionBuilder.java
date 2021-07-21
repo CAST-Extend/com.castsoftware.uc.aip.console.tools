@@ -4,6 +4,7 @@ import com.castsoftware.aip.console.tools.core.dto.ApiInfoDto;
 import com.castsoftware.aip.console.tools.core.dto.ApplicationDto;
 import com.castsoftware.aip.console.tools.core.dto.NodeDto;
 import com.castsoftware.aip.console.tools.core.dto.jobs.FileCommandRequest;
+import com.castsoftware.aip.console.tools.core.dto.jobs.JobExecutionDto;
 import com.castsoftware.aip.console.tools.core.dto.jobs.JobRequestBuilder;
 import com.castsoftware.aip.console.tools.core.dto.jobs.JobState;
 import com.castsoftware.aip.console.tools.core.dto.jobs.JobStatus;
@@ -383,7 +384,7 @@ public class AddVersionBuilder extends BaseActionBuilder implements SimpleBuildS
 
                 String expandedDomainName = vars.expand(domainName);
                 log.println(AddVersionBuilder_AddVersion_info_appNotFoundAutoCreate(variableAppName));
-                String jobGuid = jobsService.startCreateApplication(variableAppName, nodeGuid, expandedDomainName, inplaceMode, null);
+                String jobGuid = jobsService.startCreateApplication(variableAppName, nodeGuid, expandedDomainName, inplaceMode, null,null);
                 applicationGuid = jobsService.pollAndWaitForJobFinished(jobGuid,
                         jobStatusWithSteps -> log.println(JobsSteps_changed(JobStepTranslationHelper.getStepTranslation(jobStatusWithSteps.getCurrentStep()))),
                         getPollingCallback(log),
@@ -413,7 +414,7 @@ public class AddVersionBuilder extends BaseActionBuilder implements SimpleBuildS
                 //call api to check if the folder exists
                 try {
                     FileCommandRequest fileCommandRequest = FileCommandRequest.builder().command("LS").path("SOURCES:" + Paths.get(resolvedFilePath).toString()).build();
-                    apiService.postForEntity("/api/applications/" + applicationGuid + "/server-folders", fileCommandRequest, String.class);
+                    apiService.postForEntity("/api/server-folders", fileCommandRequest, String.class);
                 } catch (ApiCallException e) {
                     listener.error("Unable to find the file " + resolvedFilePath + " in the source.folder.location on AIP Console.");
                     e.printStackTrace(log);
@@ -574,7 +575,7 @@ public class AddVersionBuilder extends BaseActionBuilder implements SimpleBuildS
                                 JobsSteps_changed(JobStepTranslationHelper.getStepTranslation(jobStatusWithSteps.getCurrentStep()))
                 ),
                 getPollingCallback(log),
-                JobStatus::getState);
+                JobExecutionDto::getState);
     }
 
     @Symbol("aipAddVersion")

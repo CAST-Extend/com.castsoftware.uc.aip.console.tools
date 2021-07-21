@@ -103,9 +103,9 @@ public class UploadServiceImpl implements UploadService {
         }
         //call api to check if the folder exists
         try {
-            FileCommandRequest fileCommandRequest = FileCommandRequest.builder().command("LS").path("SOURCES:" + filePath.toPath().toString()).build();
-            restApiService.postForEntity("/api/applications/" + appGuid + "/server-folders", fileCommandRequest, String.class);
-            return "sources:" + filePath.toPath().toString();
+            FileCommandRequest fileCommandRequest = FileCommandRequest.builder().command("LS").path("SOURCES:" + filePath.toPath()).build();
+            restApiService.postForEntity("/api/server-folders", fileCommandRequest, String.class);
+            return "sources:" + filePath.toPath();
         } catch (ApiCallException e) {
             throw new UploadException("Unable to check remote location of provided folder.", e);
         }

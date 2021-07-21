@@ -1,9 +1,9 @@
 package com.castsoftware.aip.console.tools.commands;
 
 import com.castsoftware.aip.console.tools.core.dto.ApplicationDto;
+import com.castsoftware.aip.console.tools.core.dto.jobs.JobExecutionDto;
 import com.castsoftware.aip.console.tools.core.dto.jobs.JobRequestBuilder;
 import com.castsoftware.aip.console.tools.core.dto.jobs.JobState;
-import com.castsoftware.aip.console.tools.core.dto.jobs.JobStatusWithSteps;
 import com.castsoftware.aip.console.tools.core.dto.jobs.JobType;
 import com.castsoftware.aip.console.tools.core.exceptions.ApiCallException;
 import com.castsoftware.aip.console.tools.core.exceptions.ApiKeyMissingException;
@@ -217,12 +217,12 @@ public class DeliverVersionCommand implements Callable<Integer> {
             shutdownHook = getShutdownHookForJobGuid(jobGuid);
 
             Runtime.getRuntime().addShutdownHook(shutdownHook);
-            JobStatusWithSteps jobStatus = jobsService.pollAndWaitForJobFinished(jobGuid, Function.identity(), sharedOptions.isVerbose());
+            JobExecutionDto jobStatus = jobsService.pollAndWaitForJobFinished(jobGuid, Function.identity(), sharedOptions.isVerbose());
             if (JobState.COMPLETED == jobStatus.getState()) {
                 log.info("Delivery of application {} was completed successfully.", applicationName);
                 return Constants.RETURN_OK;
             } else {
-                log.error("Job did not complete. Status is '{}' on step '{}'", jobStatus.getState(), jobStatus.getFailureStep());
+                log.error("Job did not complete. Status is '{}' on step '{}'", jobStatus.getState(), jobStatus.getCurrentStep());
                 return Constants.RETURN_JOB_FAILED;
             }
         } catch (ApplicationServiceException e) {

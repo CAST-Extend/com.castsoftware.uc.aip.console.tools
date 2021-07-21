@@ -1,5 +1,6 @@
 package io.jenkins.plugins.aipconsole;
 
+import com.castsoftware.aip.console.tools.core.dto.DatabaseConnectionSettingsDto;
 import com.castsoftware.aip.console.tools.core.dto.NodeDto;
 import com.castsoftware.aip.console.tools.core.dto.jobs.JobState;
 import com.castsoftware.aip.console.tools.core.dto.jobs.LogContentDto;
@@ -31,6 +32,7 @@ import javax.annotation.Nullable;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.util.Arrays;
+import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 
@@ -70,6 +72,9 @@ public class CreateApplicationBuilder extends BaseActionBuilder implements Simpl
 
     @Nullable
     private String nodeName;
+
+    @Nullable
+    private String cssServerName;
 
     @Nullable
     private String domainName;
@@ -120,6 +125,16 @@ public class CreateApplicationBuilder extends BaseActionBuilder implements Simpl
     @DataBoundSetter
     public void setNodeName(@Nullable String nodeName) {
         this.nodeName = nodeName;
+    }
+
+    @Nullable
+    public String getCssServerName() {
+        return cssServerName;
+    }
+
+    @DataBoundSetter
+    public void setCssServerName(@Nullable String cssServerName) {
+        this.cssServerName = cssServerName;
     }
 
     @Nullable
@@ -190,8 +205,17 @@ public class CreateApplicationBuilder extends BaseActionBuilder implements Simpl
                         .orElse(null);
             }
 
+            String cssServerGuid = null;
+            if(StringUtils.isNotEmpty(cssServerName)){
+                DatabaseConnectionSettingsDto[] cssServers = apiService.getForEntity("api/settings/css-settings", DatabaseConnectionSettingsDto[].class);
+                Optional<DatabaseConnectionSettingsDto> targetCss = Arrays.stream(cssServers).filter(db->db.getServerName().equalsIgnoreCase(cssServerName)).findFirst();
+                if (targetCss.isPresent()){
+                    cssServerGuid = targetCss.get().getGuid();
+                }
+            }
+
             log.println(CreateApplicationBuilder_CreateApplication_info_startJob());
-            String createJobGuid = jobsService.startCreateApplication(expandedAppName, nodeGuid, expandedDomainName, inPlaceMode, null);
+            String createJobGuid = jobsService.startCreateApplication(expandedAppName, nodeGuid, expandedDomainName, inPlaceMode, null, cssServerGuid);
             log.println(CreateApplicationBuilder_CreateApplication_info_jobStarted());
             Consumer<LogContentDto> pollingCallback = (!getDescriptor().configuration.isVerbose()) ? null :
                     logContentDto -> {

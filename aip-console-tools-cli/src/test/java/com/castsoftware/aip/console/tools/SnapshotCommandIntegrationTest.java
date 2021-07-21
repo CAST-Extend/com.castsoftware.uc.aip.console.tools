@@ -3,9 +3,9 @@ package com.castsoftware.aip.console.tools;
 import com.castsoftware.aip.console.tools.commands.SnapshotCommand;
 import com.castsoftware.aip.console.tools.core.dto.VersionDto;
 import com.castsoftware.aip.console.tools.core.dto.VersionStatus;
+import com.castsoftware.aip.console.tools.core.dto.jobs.JobExecutionDto;
 import com.castsoftware.aip.console.tools.core.dto.jobs.JobRequestBuilder;
 import com.castsoftware.aip.console.tools.core.dto.jobs.JobState;
-import com.castsoftware.aip.console.tools.core.dto.jobs.JobStatusWithSteps;
 import com.castsoftware.aip.console.tools.core.exceptions.ApplicationServiceException;
 import com.castsoftware.aip.console.tools.core.exceptions.JobServiceException;
 import com.castsoftware.aip.console.tools.core.exceptions.PackagePathInvalidException;
@@ -90,10 +90,10 @@ public class SnapshotCommandIntegrationTest extends AipConsoleToolsCliBaseTest {
         when(applicationService.getApplicationVersion(TestConstants.TEST_APP_GUID)).thenReturn(Sets.newSet(versionDto));
         when(jobsService.startJob(any(JobRequestBuilder.class))).thenReturn(TestConstants.TEST_JOB_GUID);
 
-        JobStatusWithSteps jobStatus = new JobStatusWithSteps();
+        JobExecutionDto jobStatus = new JobExecutionDto();
         jobStatus.setAppGuid(TestConstants.TEST_APP_GUID);
         jobStatus.setState(JobState.COMPLETED);
-        jobStatus.setCreated(new Date());
+        jobStatus.setCreatedDate(new Date());
         jobStatus.setAppName(TestConstants.TEST_CREATRE_APP);
         when(jobsService.pollAndWaitForJobFinished(anyString(), any(Function.class), anyBoolean())).thenReturn(jobStatus);
 
@@ -120,10 +120,10 @@ public class SnapshotCommandIntegrationTest extends AipConsoleToolsCliBaseTest {
         when(applicationService.getApplicationVersion(TestConstants.TEST_APP_GUID)).thenReturn(Sets.newSet(versionDto));
         when(jobsService.startJob(any(JobRequestBuilder.class))).thenReturn(TestConstants.TEST_JOB_GUID);
 
-        JobStatusWithSteps jobStatus = new JobStatusWithSteps();
+        JobExecutionDto jobStatus = new JobExecutionDto();
         jobStatus.setAppGuid(TestConstants.TEST_APP_GUID);
         jobStatus.setState(JobState.STOPPED);
-        jobStatus.setCreated(new Date());
+        jobStatus.setCreatedDate(new Date());
         jobStatus.setAppName(TestConstants.TEST_CREATRE_APP);
         when(jobsService.pollAndWaitForJobFinished(anyString(), any(Function.class), anyBoolean())).thenReturn(jobStatus);
 

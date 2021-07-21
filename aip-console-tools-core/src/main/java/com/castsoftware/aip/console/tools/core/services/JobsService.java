@@ -1,8 +1,8 @@
 package com.castsoftware.aip.console.tools.core.services;
 
+import com.castsoftware.aip.console.tools.core.dto.jobs.JobExecutionDto;
 import com.castsoftware.aip.console.tools.core.dto.jobs.JobRequestBuilder;
 import com.castsoftware.aip.console.tools.core.dto.jobs.JobState;
-import com.castsoftware.aip.console.tools.core.dto.jobs.JobStatusWithSteps;
 import com.castsoftware.aip.console.tools.core.dto.jobs.LogContentDto;
 import com.castsoftware.aip.console.tools.core.exceptions.JobServiceException;
 
@@ -40,10 +40,11 @@ public interface JobsService {
      * @param nodeGuid        The Node GUID on which the application should be created. Can be null.
      * @param domainName      The name of the domain to assign to this application
      * @param inplaceMode     indicate if the app will be in "inplace" mode
+     * @param cssServerGuid target CSS server if any (can be null when none supplied)
      * @return The job GUID on AIP Console
      * @throws JobServiceException If an error occurs while starting the job
      */
-    String startCreateApplication(String applicationName, String nodeGuid, String domainName, boolean inplaceMode, String caipVersion) throws JobServiceException;
+    String startCreateApplication(String applicationName, String nodeGuid, String domainName, boolean inplaceMode, String caipVersion, String cssServerGuid) throws JobServiceException;
 
     /**
      * Start the "Create Version" job, which will create a new version for an application on AIP Console
@@ -95,13 +96,13 @@ public interface JobsService {
      * Polls AIP Console and executes the given callback once the job is completed
      *
      * @param jobGuid   The job guid to poll
-     * @param callback  A {@link Function} that takes in entry the {@link JobStatusWithSteps}
+     * @param callback  A {@link Function} that takes in entry the {@link JobExecutionDto}
      * @param logOutput whether to output the log or not
      * @param <R>       The type or return for the callback
      * @return The result from the completionCallback
      * @throws JobServiceException If any error occurs while polling AIP Console
      */
-    <R> R pollAndWaitForJobFinished(String jobGuid, Function<JobStatusWithSteps, R> callback, boolean logOutput) throws JobServiceException;
+    <R> R pollAndWaitForJobFinished(String jobGuid, Function<JobExecutionDto, R> callback, boolean logOutput) throws JobServiceException;
 
     /**
      * Polls AIP Console, then for each changes to the current step of the job, runs the provided stepChangedCallback.
@@ -109,7 +110,7 @@ public interface JobsService {
      * <p/>
      * The {@link JobsServiceImpl#pollAndWaitForJobFinished(String)} uses this method internally.
      * It polls the status and on any step changes, it'll log the current step.
-     * Once the job is complete, we simply get {@link JobState} from the {@link JobStatusWithSteps} and return it.
+     * Once the job is complete, we simply get {@link JobState} from the {@link JobExecutionDto} and return it.
      * <p/>
      *
      * @param jobGuid             The GUID of the job to poll on AIP Console
@@ -121,7 +122,7 @@ public interface JobsService {
      */
     //<R> R pollAndWaitForJobFinished(String jobGuid, Consumer<JobStatusWithSteps> stepChangedCallback, Function<JobStatusWithSteps, R> completionCallback) throws JobServiceException;
 
-    <R> R pollAndWaitForJobFinished(String jobGuid, Consumer<JobStatusWithSteps> stepChangedCallback, Consumer<LogContentDto> pollingCallback, Function<JobStatusWithSteps, R> completionCallback) throws JobServiceException;
+    <R> R pollAndWaitForJobFinished(String jobGuid, Consumer<JobExecutionDto> stepChangedCallback, Consumer<LogContentDto> pollingCallback, Function<JobExecutionDto, R> completionCallback) throws JobServiceException;
 
     void cancelJob(String jobGuid) throws JobServiceException;
 }

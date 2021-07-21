@@ -1,9 +1,9 @@
 package com.castsoftware.aip.console.tools;
 
 import com.castsoftware.aip.console.tools.commands.DeliverVersionCommand;
+import com.castsoftware.aip.console.tools.core.dto.jobs.JobExecutionDto;
 import com.castsoftware.aip.console.tools.core.dto.jobs.JobRequestBuilder;
 import com.castsoftware.aip.console.tools.core.dto.jobs.JobState;
-import com.castsoftware.aip.console.tools.core.dto.jobs.JobStatusWithSteps;
 import com.castsoftware.aip.console.tools.core.exceptions.ApplicationServiceException;
 import com.castsoftware.aip.console.tools.core.exceptions.JobServiceException;
 import com.castsoftware.aip.console.tools.core.exceptions.PackagePathInvalidException;
@@ -76,10 +76,10 @@ public class DeliverVersionCommandIntegrationTest extends AipConsoleToolsCliBase
         when(applicationService.createDeliveryConfiguration(TestConstants.TEST_APP_GUID, sflPath.toString(), null, false)).thenReturn(TestConstants.TEST_DELIVERY_CONFIG_GUID);
         when(jobsService.startAddVersionJob(any(JobRequestBuilder.class))).thenReturn(null);
 
-        JobStatusWithSteps jobStatus = new JobStatusWithSteps();
+        JobExecutionDto jobStatus = new JobExecutionDto();
         jobStatus.setAppGuid(TestConstants.TEST_APP_GUID);
         jobStatus.setState(JobState.FAILED);
-        jobStatus.setCreated(new Date());
+        jobStatus.setCreatedDate(new Date());
         jobStatus.setAppName(TestConstants.TEST_CREATRE_APP);
         when(jobsService.pollAndWaitForJobFinished(eq(null), any(Function.class), anyBoolean())).thenReturn(jobStatus);
 
@@ -112,10 +112,10 @@ public class DeliverVersionCommandIntegrationTest extends AipConsoleToolsCliBase
         when(applicationService.createDeliveryConfiguration(TestConstants.TEST_APP_GUID, sflPath.toString(), null, false)).thenReturn(TestConstants.TEST_DELIVERY_CONFIG_GUID);
         when(jobsService.startAddVersionJob(any(JobRequestBuilder.class))).thenReturn(TestConstants.TEST_JOB_GUID);
 
-        JobStatusWithSteps jobStatus = new JobStatusWithSteps();
+        JobExecutionDto jobStatus = new JobExecutionDto();
         jobStatus.setAppGuid(TestConstants.TEST_APP_GUID);
         jobStatus.setState(JobState.COMPLETED);
-        jobStatus.setCreated(new Date());
+        jobStatus.setCreatedDate(new Date());
         jobStatus.setAppName(TestConstants.TEST_CREATRE_APP);
         when(jobsService.pollAndWaitForJobFinished(anyString(), any(Function.class), anyBoolean())).thenReturn(jobStatus);
 

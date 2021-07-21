@@ -2,9 +2,9 @@ package com.castsoftware.aip.console.tools;
 
 import com.castsoftware.aip.console.tools.commands.AddVersionCommand;
 import com.castsoftware.aip.console.tools.core.dto.DebugOptionsDto;
+import com.castsoftware.aip.console.tools.core.dto.jobs.JobExecutionDto;
 import com.castsoftware.aip.console.tools.core.dto.jobs.JobRequestBuilder;
 import com.castsoftware.aip.console.tools.core.dto.jobs.JobState;
-import com.castsoftware.aip.console.tools.core.dto.jobs.JobStatusWithSteps;
 import com.castsoftware.aip.console.tools.core.exceptions.ApplicationServiceException;
 import com.castsoftware.aip.console.tools.core.exceptions.JobServiceException;
 import com.castsoftware.aip.console.tools.core.exceptions.PackagePathInvalidException;
@@ -114,10 +114,10 @@ public class AddVersionCommandIntegrationTest extends AipConsoleToolsCliBaseTest
         when(debugOptions.isActivateAmtMemoryProfile()).thenReturn(false);
         when(applicationService.getDebugOptions(TestConstants.TEST_APP_GUID)).thenReturn(debugOptions);
 
-        JobStatusWithSteps jobStatus = new JobStatusWithSteps();
+        JobExecutionDto jobStatus = new JobExecutionDto();
         jobStatus.setAppGuid(TestConstants.TEST_APP_GUID);
         jobStatus.setState(JobState.COMPLETED);
-        jobStatus.setCreated(new Date());
+        jobStatus.setCreatedDate(new Date());
         jobStatus.setAppName(TestConstants.TEST_CREATRE_APP);
         when(jobsService.pollAndWaitForJobFinished(TestConstants.TEST_JOB_GUID, Function.identity(), true)).thenReturn(jobStatus);
 

@@ -16,7 +16,6 @@ import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.exc.MismatchedInputException;
 import com.fasterxml.jackson.databind.type.TypeFactory;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-import lombok.Builder;
 import lombok.extern.java.Log;
 import okhttp3.Cookie;
 import okhttp3.CookieJar;
@@ -268,7 +267,6 @@ public class RestApiServiceImpl implements RestApiService {
             if (StringUtils.isNotEmpty(jobsRequest.getParameterValueAsString(PARAM_CAIP_VERSION))) {
                 requestBuilder.addHeader(PARAM_CAIP_VERSION, jobsRequest.getParameterValueAsString(PARAM_CAIP_VERSION));
             }
-            requestBuilder.url(getEndpointForV2(jobsRequest));
             requestBuilder.method(method, getRequestBodyForEntityV2(jobsRequest));
         }
         log.fine(String.format("Executing call with method %s to endpoint %s", method, endpoint));
@@ -285,27 +283,6 @@ public class RestApiServiceImpl implements RestApiService {
             log.log(Level.SEVERE, "Unable to send request", e);
             throw new ApiCallException(500, e);
         }
-    }
-
-    private String getEndpointForV2(CreateJobsRequest request) {
-        String uri = null;
-        switch (request.getJobType()) {
-            case DECLARE_APPLICATION:
-                uri = "/api/jobs/create-application";
-                break;
-            case ADD_VERSION:
-                uri = "/api/jobs/add-version";
-                break;
-            case CLONE_VERSION:
-                uri = "/api/jobs/clone-version";
-                break;
-            case ANALYZE:
-                uri = "/api/jobs/analyze";
-                break;
-            default:
-                break;
-        }
-        return this.serverUrl + uri;
     }
 
     @Override

@@ -44,7 +44,7 @@ public class Constants {
     public static final String UPLOAD_SNAPSHOTS = "upload_snapshots";
     // New name for the last step in analysis (this consolidate snapshots and upload to central db)
     public static final String UPLOAD_APP_SNAPSHOT = "upload_application";
-    public static final String DECLARE_APPLICATION = "declare_application";
+    public static final String CREATE_APPLICATION = "create-application";
     public static final String DELETE_APPLICATION = "delete_application";
     public static final String FUNCTION_POINTS = "function_points";
     public static final String BACKUP = "BACKUP";
@@ -60,6 +60,7 @@ public class Constants {
     public static final String PARAM_APP_NAME = "appName";
     public static final String PARAM_INPLACE_MODE = "inPlaceMode";
     public static final String PARAM_NODE_GUID = "nodeGuid";
+    public static final String PARAM_DOMAIN_NAME = "domainName";
     public static final String PARAM_VERSION_NAME = "versionName";
     public static final String PARAM_SNAPSHOT_CAPTURE_DATE = "snapshotCaptureDate";
     public static final String PARAM_START_STEP = "startStep";

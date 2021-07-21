@@ -1,13 +1,12 @@
 package com.castsoftware.aip.console.tools;
 
 import com.castsoftware.aip.console.tools.commands.AnalyzeCommand;
-import com.castsoftware.aip.console.tools.core.dto.ApplicationDto;
 import com.castsoftware.aip.console.tools.core.dto.DebugOptionsDto;
 import com.castsoftware.aip.console.tools.core.dto.VersionDto;
 import com.castsoftware.aip.console.tools.core.dto.VersionStatus;
+import com.castsoftware.aip.console.tools.core.dto.jobs.JobExecutionDto;
 import com.castsoftware.aip.console.tools.core.dto.jobs.JobRequestBuilder;
 import com.castsoftware.aip.console.tools.core.dto.jobs.JobState;
-import com.castsoftware.aip.console.tools.core.dto.jobs.JobStatusWithSteps;
 import com.castsoftware.aip.console.tools.core.exceptions.ApplicationServiceException;
 import com.castsoftware.aip.console.tools.core.exceptions.JobServiceException;
 import com.castsoftware.aip.console.tools.core.exceptions.PackagePathInvalidException;
@@ -27,7 +26,6 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.function.Function;
 
-import static com.castsoftware.aip.console.tools.TestConstants.TEST_APP;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.greaterThan;
 import static org.hamcrest.Matchers.is;
@@ -171,10 +169,10 @@ public class AnalyzeCommandIntegrationTest extends AipConsoleToolsCliBaseTest {
         when(debugOptions.isActivateAmtMemoryProfile()).thenReturn(false);
         when(applicationService.getDebugOptions(TestConstants.TEST_APP_GUID)).thenReturn(debugOptions);
 
-        JobStatusWithSteps jobStatus = new JobStatusWithSteps();
+        JobExecutionDto jobStatus = new JobExecutionDto();
         jobStatus.setAppGuid(TestConstants.TEST_APP_GUID);
         jobStatus.setState(JobState.COMPLETED);
-        jobStatus.setCreated(new Date());
+        jobStatus.setCreatedDate(new Date());
         jobStatus.setAppName(TestConstants.TEST_CREATRE_APP);
         when(jobsService.pollAndWaitForJobFinished(anyString(), any(Function.class), anyBoolean())).thenReturn(jobStatus);
 

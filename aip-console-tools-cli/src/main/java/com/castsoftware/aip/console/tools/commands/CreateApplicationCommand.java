@@ -1,5 +1,6 @@
 package com.castsoftware.aip.console.tools.commands;
 
+import com.castsoftware.aip.console.tools.core.dto.DatabaseConnectionSettingsDto;
 import com.castsoftware.aip.console.tools.core.dto.NodeDto;
 import com.castsoftware.aip.console.tools.core.dto.jobs.JobState;
 import com.castsoftware.aip.console.tools.core.exceptions.ApiCallException;
@@ -20,6 +21,7 @@ import picocli.CommandLine;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
 
@@ -66,6 +68,9 @@ public class CreateApplicationCommand implements Callable<Integer> {
             fallbackValue = "true")
     private boolean inPlaceMode = false;
 
+    @CommandLine.Option(names = {"-css","--css-server"}, description = "CSS Server name that will host the application data: format is host:port ")
+    private String cssServerName;
+
     @CommandLine.Unmatched
     private List<String> unmatchedOptions;
 
@@ -83,6 +88,23 @@ public class CreateApplicationCommand implements Callable<Integer> {
         }
 
         log.info("Create application command has triggered with log output = '{}'", sharedOptions.isVerbose());
+        if (inPlaceMode){
+            log.info("The created application will have the \"Simplified Delivery Mode\" operating");
+        }
+
+        String cssServerGuid = null;
+        if(StringUtils.isNotEmpty(cssServerName)){
+            try {
+                DatabaseConnectionSettingsDto[] cssServers = restApiService.getForEntity("api/settings/css-settings", DatabaseConnectionSettingsDto[].class);
+                Optional<DatabaseConnectionSettingsDto> targetCss = Arrays.stream(cssServers).filter(db->db.getServerName().equalsIgnoreCase(cssServerName)).findFirst();
+                if (targetCss.isPresent()){
+                    cssServerGuid = targetCss.get().getGuid();
+                }
+            } catch (ApiCallException e) {
+                log.error("Call to AIP Console resulted in an error.", e);
+                return Constants.UNKNOWN_ERROR;
+            }
+        }
 
         try {
             String nodeGuid = null;
@@ -98,7 +120,8 @@ public class CreateApplicationCommand implements Callable<Integer> {
                     return Constants.RETURN_APPLICATION_NOT_FOUND;
                 }
             }
-            String jobGuid = jobsService.startCreateApplication(applicationName, nodeGuid, domainName, inPlaceMode, null);
+
+            String jobGuid = jobsService.startCreateApplication(applicationName, nodeGuid, domainName, inPlaceMode, null, cssServerGuid);
             log.info("Started job to create new application.");
             return jobsService.pollAndWaitForJobFinished(jobGuid, (jobDetails) -> {
                 if (jobDetails.getState() != JobState.COMPLETED) {

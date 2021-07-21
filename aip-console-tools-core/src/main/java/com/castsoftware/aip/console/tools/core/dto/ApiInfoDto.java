@@ -58,7 +58,7 @@ public class ApiInfoDto {
     public boolean isSourcePathPrefixRequired() {
         SemVer consoleVersion = getSemVer();
         // Prefix is required for versions above 1.12 (?)
-        return consoleVersion.getMajor() >= 1 && consoleVersion.getMinor() > 12;
+        return consoleVersion.getMajor() > 1 || consoleVersion.getMajor() == 1 && consoleVersion.getMinor() > 12;
     }
 
     public boolean isJobStatusWithDuration() {

@@ -341,7 +341,7 @@ public class AddVersionBuilderTest {
         doReturn(Collections.singletonList(new NodeDto(TEST_NODE_NAME, TEST_NODE_NAME, "http", "localhost", 8082)))
                 .when(restApiService).getForEntity(eq("/api/nodes"), isA(TypeReference.class));
         doReturn("createAppGuid")
-                .when(jobsService).startCreateApplication(TEST_APP_NAME, TEST_NODE_NAME, null, false, null);
+                .when(jobsService).startCreateApplication(TEST_APP_NAME, TEST_NODE_NAME, null, false, null,null);
         doReturn(TEST_APP_NAME)
                 .when(jobsService).pollAndWaitForJobFinished(eq("createAppGuid"), any(), any(), any());
         doReturn(true)

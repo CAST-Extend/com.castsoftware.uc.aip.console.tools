@@ -4,6 +4,7 @@ import com.castsoftware.aip.console.tools.core.dto.ApiInfoDto;
 import com.castsoftware.aip.console.tools.core.dto.ApplicationDto;
 import com.castsoftware.aip.console.tools.core.dto.VersionDto;
 import com.castsoftware.aip.console.tools.core.dto.VersionStatus;
+import com.castsoftware.aip.console.tools.core.dto.jobs.JobExecutionDto;
 import com.castsoftware.aip.console.tools.core.dto.jobs.JobRequestBuilder;
 import com.castsoftware.aip.console.tools.core.dto.jobs.JobState;
 import com.castsoftware.aip.console.tools.core.dto.jobs.JobStatus;
@@ -298,7 +299,7 @@ public class AnalyzeBuilder extends BaseActionBuilder implements SimpleBuildStep
                                 JobsSteps_changed(JobStepTranslationHelper.getStepTranslation(jobStatusWithSteps.getCurrentStep()))
                 ),
                 getPollingCallback(log),
-                JobStatus::getState);
+                JobExecutionDto::getState);
     }
 
     private Consumer<LogContentDto> getPollingCallback(PrintStream log) {

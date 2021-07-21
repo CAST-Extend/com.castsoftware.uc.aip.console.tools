@@ -5,6 +5,7 @@ import com.castsoftware.aip.console.tools.core.dto.ApplicationDto;
 import com.castsoftware.aip.console.tools.core.dto.NodeDto;
 import com.castsoftware.aip.console.tools.core.dto.VersionDto;
 import com.castsoftware.aip.console.tools.core.dto.jobs.FileCommandRequest;
+import com.castsoftware.aip.console.tools.core.dto.jobs.JobExecutionDto;
 import com.castsoftware.aip.console.tools.core.dto.jobs.JobRequestBuilder;
 import com.castsoftware.aip.console.tools.core.dto.jobs.JobState;
 import com.castsoftware.aip.console.tools.core.dto.jobs.JobStatus;
@@ -410,7 +411,7 @@ public class DeliverBuilder extends BaseActionBuilder implements SimpleBuildStep
                 // check existence of domain first ?
                 String expandedDomainName = vars.expand(domainName);
                 log.println(AddVersionBuilder_AddVersion_info_appNotFoundAutoCreate(expandedAppName));
-                String jobGuid = jobsService.startCreateApplication(expandedAppName, nodeGuid, expandedDomainName, inplaceMode, null);
+                String jobGuid = jobsService.startCreateApplication(expandedAppName, nodeGuid, expandedDomainName, inplaceMode, null,null);
                 applicationGuid = jobsService.pollAndWaitForJobFinished(jobGuid,
                         jobStatusWithSteps -> log.println(JobsSteps_changed(JobStepTranslationHelper.getStepTranslation(jobStatusWithSteps.getCurrentStep()))),
                         getPollingCallback(log),
@@ -437,7 +438,7 @@ public class DeliverBuilder extends BaseActionBuilder implements SimpleBuildStep
                 //call api to check if the folder exists
                 try {
                     FileCommandRequest fileCommandRequest = FileCommandRequest.builder().command("LS").path("SOURCES:" + Paths.get(resolvedFilePath).toString()).build();
-                    apiService.postForEntity("/api/applications/" + applicationGuid + "/server-folders", fileCommandRequest, String.class);
+                    apiService.postForEntity("/api/server-folders", fileCommandRequest, String.class);
                 } catch (ApiCallException e) {
                     listener.error("Unable to find the file " + resolvedFilePath + " in the source.folder.location");
                     e.printStackTrace(log);
@@ -616,7 +617,7 @@ public class DeliverBuilder extends BaseActionBuilder implements SimpleBuildStep
                                 JobsSteps_changed(JobStepTranslationHelper.getStepTranslation(jobStatusWithSteps.getCurrentStep()))
                 ),
                 getPollingCallback(log),
-                JobStatus::getState);
+                JobExecutionDto::getState);
     }
 
     private Consumer<LogContentDto> getPollingCallback(PrintStream log) {

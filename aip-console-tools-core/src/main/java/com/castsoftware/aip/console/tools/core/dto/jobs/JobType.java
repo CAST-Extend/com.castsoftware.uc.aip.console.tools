@@ -20,7 +20,7 @@ public enum JobType {
 
     CONSOLIDATE_SNAPSHOT(Constants.CONSOLIDATE_SNAPSHOT, "Consolidate snapshot"),
 
-    DECLARE_APPLICATION(Constants.DECLARE_APPLICATION, "Register application"),
+    CREATE_APPLICATION(Constants.CREATE_APPLICATION, "Register application"),
 
     DELETE_APPLICATION(Constants.DELETE_APPLICATION, "Delete application"),
 

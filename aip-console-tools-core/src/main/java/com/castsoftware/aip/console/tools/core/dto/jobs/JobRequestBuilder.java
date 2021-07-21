@@ -5,6 +5,7 @@ import org.apache.commons.lang3.StringUtils;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -12,7 +13,9 @@ import java.util.List;
 import java.util.Map;
 
 public class JobRequestBuilder {
-    private static final DateFormat RELEASE_DATE_FORMATTER = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
+    public static final DateTimeFormatter DELIVERY_DATETIME_FORMAT = DateTimeFormatter.ofPattern("yyyyMMddHHmm");
+    public static final DateTimeFormatter DELIVERY_DATETIME_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
+    public static final DateFormat RELEASE_DATE_FORMATTER = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
     private static final DateFormat VERSION_NAME_FORMATTER = new SimpleDateFormat("yyMMdd.HHmmss");
     private static final String GLOBAL_RISK_OBJECTIVE = "GLOBAL_RISK";
     private static final String FUNCTIONAL_POINTS_OBJECTIVE = "FUNCTIONAL_POINTS";

@@ -2,11 +2,11 @@ package com.castsoftware.aip.console.tools.core.services;
 
 import com.castsoftware.aip.console.tools.core.dto.ApiInfoDto;
 import com.castsoftware.aip.console.tools.core.dto.jobs.ChangeJobStateRequest;
+import com.castsoftware.aip.console.tools.core.dto.jobs.CreateApplicationJobRequest;
 import com.castsoftware.aip.console.tools.core.dto.jobs.CreateJobsRequest;
+import com.castsoftware.aip.console.tools.core.dto.jobs.JobExecutionDto;
 import com.castsoftware.aip.console.tools.core.dto.jobs.JobRequestBuilder;
 import com.castsoftware.aip.console.tools.core.dto.jobs.JobState;
-import com.castsoftware.aip.console.tools.core.dto.jobs.JobStatus;
-import com.castsoftware.aip.console.tools.core.dto.jobs.JobStatusWithSteps;
 import com.castsoftware.aip.console.tools.core.dto.jobs.JobType;
 import com.castsoftware.aip.console.tools.core.dto.jobs.LogContentDto;
 import com.castsoftware.aip.console.tools.core.dto.jobs.LogsDto;
@@ -23,8 +23,6 @@ import org.apache.commons.lang3.StringUtils;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
@@ -61,27 +59,18 @@ public class JobsServiceImpl implements JobsService {
 
     @Override
     public String startCreateApplication(String applicationName, String nodeGuid, boolean inplaceMode, String caipVersion) throws JobServiceException {
-        return startCreateApplication(applicationName, nodeGuid, null, inplaceMode, caipVersion);
+        return startCreateApplication(applicationName, nodeGuid, null, inplaceMode, caipVersion,null);
     }
 
     @Override
-    public String startCreateApplication(String applicationName, String nodeGuid, String domainName, boolean inplaceMode, String caipVersion) throws JobServiceException {
-        Map<String, Object> jobParams = new HashMap<>();
-        jobParams.put(Constants.PARAM_APP_NAME, applicationName);
-        //jobParams.put(Constants.PARAM_INPLACE_MODE, String.valueOf(inplaceMode));
-        if (StringUtils.isNotBlank(nodeGuid)) {
-            jobParams.put(Constants.PARAM_NODE_GUID, nodeGuid);
-        }
-        if (StringUtils.isNotBlank(domainName)) {
-            jobParams.put("domainName", domainName);
-        }
-
+    public String startCreateApplication(String applicationName, String nodeGuid, String domainName, boolean inplaceMode, String caipVersion, String cssServerGuid) throws JobServiceException {
         try {
-            String jobsEndpoint = ApiEndpointHelper.getJobsEndpoint();
-            CreateJobsRequest request = new CreateJobsRequest();
-            request.setJobType(JobType.DECLARE_APPLICATION);
-            request.setJobParameters(jobParams);
-            SuccessfulJobStartDto jobStartDto = restApiService.postForEntity(jobsEndpoint, request, SuccessfulJobStartDto.class);
+            CreateApplicationJobRequest.CreateApplicationJobRequestBuilder requestBuilder =
+                    CreateApplicationJobRequest.builder().appName(applicationName).inPlaceMode(inplaceMode).caipVersion(caipVersion).cssGuid(cssServerGuid);
+            if (StringUtils.isNotBlank(domainName)) {
+                requestBuilder.domainName(domainName);
+            }
+            SuccessfulJobStartDto jobStartDto = restApiService.postForEntity(ApiEndpointHelper.getCreateApplicationEndPoint(), requestBuilder.build(), SuccessfulJobStartDto.class);
             return jobStartDto.getJobGuid();
         } catch (ApiCallException e) {
             log.log(Level.SEVERE, "Unable to create new application '" + applicationName + "'", e);
@@ -137,7 +126,7 @@ public class JobsServiceImpl implements JobsService {
         ApiInfoDto apiInfoDto = getApiInfoDto();
 
         try {
-            SuccessfulJobStartDto dto = restApiService.postForEntity(ApiEndpointHelper.getJobsEndpoint(), jobRequest, SuccessfulJobStartDto.class);
+            SuccessfulJobStartDto dto = restApiService.postForEntity(ApiEndpointHelper.getJobsEndpoint(jobRequest), jobRequest, SuccessfulJobStartDto.class);
 
             if (dto == null || StringUtils.isBlank(dto.getJobGuid())) {
                 throw new JobServiceException("No response from AIP Console when start the job");
@@ -147,7 +136,7 @@ public class JobsServiceImpl implements JobsService {
             // Job is started in suspended state, and must be resumed
             if (apiInfoDto.isJobToBeResumed()) {
                 String jobDetailsEndpoint = ApiEndpointHelper.getJobDetailsEndpoint(dto.getJobGuid());
-                JobStatusWithSteps jobStatusWithSteps = restApiService.getForEntity(jobDetailsEndpoint, JobStatusWithSteps.class);
+                JobExecutionDto jobStatusWithSteps = restApiService.getForEntity(jobDetailsEndpoint, JobExecutionDto.class);
                 if (jobStatusWithSteps.getState() == JobState.STARTING) {
                     log.finest("Resuming suspended job");
                     ChangeJobStateRequest resumeRequest = new ChangeJobStateRequest();
@@ -165,11 +154,11 @@ public class JobsServiceImpl implements JobsService {
 
     @Override
     public JobState pollAndWaitForJobFinished(String jobGuid) throws JobServiceException {
-        return pollAndWaitForJobFinished(jobGuid, JobStatus::getState, true);
+        return pollAndWaitForJobFinished(jobGuid, JobExecutionDto::getState, true);
     }
 
     @Override
-    public <R> R pollAndWaitForJobFinished(String jobGuid, Function<JobStatusWithSteps, R> callback, boolean logOutput) throws JobServiceException {
+    public <R> R pollAndWaitForJobFinished(String jobGuid, Function<JobExecutionDto, R> callback, boolean logOutput) throws JobServiceException {
         Consumer<LogContentDto> pollingCallback = !logOutput ? null : jobContentDto -> printLog(jobContentDto);
         return pollAndWaitForJobFinished(jobGuid,
                 jobStep -> log.info("Current step is : " + jobStep.getCurrentStep()),
@@ -178,7 +167,7 @@ public class JobsServiceImpl implements JobsService {
     }
 
     @Override
-    public <R> R pollAndWaitForJobFinished(String jobGuid, Consumer<JobStatusWithSteps> stepChangedCallback, Consumer<LogContentDto> pollingCallback, Function<JobStatusWithSteps, R> completionCallback) throws JobServiceException {
+    public <R> R pollAndWaitForJobFinished(String jobGuid, Consumer<JobExecutionDto> stepChangedCallback, Consumer<LogContentDto> pollingCallback, Function<JobExecutionDto, R> completionCallback) throws JobServiceException {
         assert StringUtils.isNotBlank(jobGuid);
 
         String jobDetailsEndpoint = ApiEndpointHelper.getJobDetailsEndpoint(jobGuid);
@@ -186,7 +175,7 @@ public class JobsServiceImpl implements JobsService {
         log.fine("Checking status of Job with GUID " + jobGuid);
         int retryCount = 0;
         try {
-            JobStatusWithSteps jobStatus;
+            JobExecutionDto jobStatus;
             String logName = null;
             int startOffset = 0;
             while (true) {
@@ -269,9 +258,9 @@ public class JobsServiceImpl implements JobsService {
         }
     }
 
-    private JobStatusWithSteps getJobStatus(String jobDetailsEndpoint) {
+    private JobExecutionDto getJobStatus(String jobDetailsEndpoint) {
         try {
-            return restApiService.getForEntity(jobDetailsEndpoint, JobStatusWithSteps.class);
+            return restApiService.getForEntity(jobDetailsEndpoint, JobExecutionDto.class);
         } catch (ApiCallException e) {
             log.log(Level.SEVERE, "Error to get job status " + jobDetailsEndpoint);
             return null;

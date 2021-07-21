@@ -5,9 +5,9 @@ import com.castsoftware.aip.console.tools.core.dto.ApplicationDto;
 import com.castsoftware.aip.console.tools.core.dto.DebugOptionsDto;
 import com.castsoftware.aip.console.tools.core.dto.VersionDto;
 import com.castsoftware.aip.console.tools.core.dto.VersionStatus;
+import com.castsoftware.aip.console.tools.core.dto.jobs.JobExecutionDto;
 import com.castsoftware.aip.console.tools.core.dto.jobs.JobRequestBuilder;
 import com.castsoftware.aip.console.tools.core.dto.jobs.JobState;
-import com.castsoftware.aip.console.tools.core.dto.jobs.JobStatusWithSteps;
 import com.castsoftware.aip.console.tools.core.dto.jobs.JobType;
 import com.castsoftware.aip.console.tools.core.exceptions.ApiCallException;
 import com.castsoftware.aip.console.tools.core.exceptions.ApiKeyMissingException;
@@ -181,7 +181,7 @@ public class AnalyzeCommand implements Callable<Integer> {
             Thread shutdownHook = getShutdownHookForJobGuid(jobGuid);
 
             Runtime.getRuntime().addShutdownHook(shutdownHook);
-            JobStatusWithSteps jobStatus = jobsService.pollAndWaitForJobFinished(jobGuid, Function.identity(), sharedOptions.isVerbose());
+            JobExecutionDto jobStatus = jobsService.pollAndWaitForJobFinished(jobGuid, Function.identity(), sharedOptions.isVerbose());
             Runtime.getRuntime().removeShutdownHook(shutdownHook);
 
             DebugOptionsDto debugOptions = applicationService.getDebugOptions(applicationGuid);
@@ -195,7 +195,7 @@ public class AnalyzeCommand implements Callable<Integer> {
                 return Constants.RETURN_OK;
             }
 
-            log.error("Analysis did not complete. Status is '{}' on step '{}'", jobStatus.getState(), jobStatus.getFailureStep());
+            log.error("Analysis did not complete. Status is '{}' on step '{}'", jobStatus.getState(), jobStatus.getCurrentStep());
             return Constants.RETURN_JOB_FAILED;
         } catch (ApplicationServiceException e) {
             return Constants.RETURN_APPLICATION_INFO_MISSING;

@@ -45,6 +45,18 @@ public class CreateApplicationCommandTest {
         assertEquals(true, createAppCmd.isInPlaceMode());
         assertEquals(true, createAppCmd.getSharedOptions().isVerbose());
     }
+    @Test
+    public void testCreateApplicationCommand_WithTargetCssServer() {
+        String TARGET_CSS_SERVER_NAME="host.docker.internal:2285";
+        String[] sb = new String[]{"new", "--apikey", TEST_API_KEY, "--app-name=" + TEST_CREATRE_APP
+                , "--inplace-mode", "true", "-css",TARGET_CSS_SERVER_NAME};
+        createAppCmdLine.parseArgs(sb);
+        assertEquals(TEST_API_KEY, createAppCmd.getSharedOptions().getApiKey());
+        assertEquals(TEST_CREATRE_APP, createAppCmd.getApplicationName());
+        assertEquals(true, createAppCmd.isInPlaceMode());
+        assertEquals(true, createAppCmd.getSharedOptions().isVerbose());
+        assertEquals(TARGET_CSS_SERVER_NAME, createAppCmd.getCssServerName());
+    }
 
     @Test
     public void testCreateApplicationCommand_withAlias() {
